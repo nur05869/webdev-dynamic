@@ -154,7 +154,7 @@ app.get('/DistractedDriving/:percentage', (req, res) => { //Car insurance
         return;
     }
 
-    if ((Percentage % 10) >= 55) {
+    if ((Percentage % 10) >= 5) {
         Percentage = Percentage - ((Percentage % 10)) + 10
     }
     else {
