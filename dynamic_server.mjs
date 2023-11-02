@@ -10,6 +10,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const port = 2000;
 const root = path.join(__dirname, 'public');
 const template = path.join(__dirname, 'templates');
+const root2 = path.join(__dirname, 'public/js/vendor');
 
 let app = express();
 app.use(express.static(root));
@@ -43,10 +44,10 @@ app.get('/State/:name', (req, res) => {
 
     let p1 = dbSelect("SELECT * FROM drivers WHERE State=?", [state]);
     let p2 = fs.promises.readFile(path.join(template, 'template2.html'), 'utf-8');
-    let ID, IDplus, IDminus, response;
+    let ID, IDplus, IDminus, response, StateShort;
     Promise.all([p1, p2]).then((results) => {
         console.log(p1)
-        response = results[1].replace('$$STATENAME$$', results[0][0].State);
+        response = results[1].replaceAll('$$STATENAME$$', results[0][0].State);
         let row = results[0][0];
         response = response.replace('$$INPUT1$$', row["Number of drivers involved in fatal collisions per billion miles"]);
         response = response.replace('$$INPUT2$$', row["Percentage Of Drivers Involved In Fatal Collisions Who Were Speeding"]);
@@ -56,6 +57,8 @@ app.get('/State/:name', (req, res) => {
         response = response.replace('$$INPUT6$$', row["Car Insurance Premiums ($)"]);
         response = response.replace('$$INPUT7$$', row["Losses incurred by insurance companies for collisions per insured driver ($)"]);
         ID = row["ID"];
+        StateShort = row["StateShort"];
+        response = response.replaceAll('$$CLUE$$', StateShort);
         IDplus = ID + 1;
         IDminus = ID - 1;
         let p3 = dbSelect("SELECT State FROM drivers WHERE ID = ?", [IDplus]);
@@ -113,7 +116,7 @@ app.get('/Insurance/:frequency', (req, res) => { //Car insurance
 
     let p1 = dbSelect("SELECT State, [Car Insurance Premiums ($)] FROM drivers WHERE [Car Insurance Premiums ($)] > ?", [frequency]);
     let p2 = fs.promises.readFile(path.join(template, 'template1.html'), 'utf-8');
-    Promise.all([p1, p2]).then((results) => {
+    Promise.all([p1, p2,]).then((results) => {
         let response = results[1].replace('$$STATENAME$$', 'States with Insurance Premiums over ' + frequency + " (URL Rounded to Nearest 100)");
         let table_body = '';
         results[0].forEach((row) => {
@@ -130,6 +133,21 @@ app.get('/Insurance/:frequency', (req, res) => { //Car insurance
         }
         if (frequency >= 1300) {
             response = response.replace('$$NEXT$$', ' ');
+        }
+        if (frequency < 300) {
+            response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2020/09/21st-Century-Insurance-Logo-500x313.png')
+            response = response.replaceAll('$$INSUR$$', '21st Century Insurance')
+        } 
+        if (frequency < 600) {
+            response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2022/12/AAMI-logo-500x281.png')
+            response = response.replaceAll('$$INSUR$$', 'AAMI Insurance')
+        } 
+        if (frequency < 900) {
+            response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2022/12/American-Family-Insurance-logo-500x281.png')
+            response = response.replaceAll('$$INSUR$$', 'American Family Insurance')
+        } else {
+            response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2021/12/Budget-logo-500x281.png')
+            response = response.replaceAll('$$INSUR$$', 'Budget Insurance')
         }
         response = response.replace('$$NEXT$$', (frequency+100));
         response = response.replace('$$PREV$$', (frequency-100));
@@ -183,6 +201,14 @@ app.get('/DistractedDriving/:percentage', (req, res) => { //Car insurance
         if (Percentage >= 90) {
             response = response.replace('$$NEXT$$', ' ');
         }
+        if (Percentage >= 70) {
+            response = response.replace('$$YOUTUBE$$', "https://www.youtube.com/embed/mnw_7xI5klM?si=BfXLHkiQL5pQWwu0")
+        }
+        if (Percentage >= 50) {
+            response = response.replace('$$YOUTUBE$$', "https://www.youtube.com/embed/ucPJm_zNwio?si=Em_SoBu7QBI7ewL-")
+        } else {
+            response = response.replace('$$YOUTUBE$$', 'https://www.youtube.com/embed/uxbRRjuxrgI?si=rEOvqlOPGHgFkAJE')
+        }
         response = response.replace('$$NEXT$$', (Percentage+10));
         response = response.replace('$$PREV$$', (Percentage-10));
         res.status(200).type('html').send(response);
@@ -195,4 +221,6 @@ app.get('/DistractedDriving/:percentage', (req, res) => { //Car insurance
 
 app.listen(port, () => {
     console.log('Now listening on port' + port);
+    console.log("Root is" + root);
+
 });
