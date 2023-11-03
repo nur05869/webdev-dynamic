@@ -39,7 +39,7 @@
                     <div class="cell small-12"><br></div>
                 </div>
                 <div class="grid-x grid-padding x">
-                    <table> 
+                    <table>
                         <!-- <thead>
                             <tr>
                                 <th>State</th>
@@ -79,6 +79,8 @@
                       </table>
                     </table>
                 </div>
+                <canvas id="myChart"></canvas>
+                <div id="chartData" style="display: none;">$$CHART$$</div>
                 <div class="grid-x grid-padding x">
                     <div class="cell small-12"><br></div>
                     <div class="cell small-12"><br></div>
@@ -97,6 +99,40 @@
     <script src="/public/js/vendor/foundation.js"></script>
     <script type="application/javascript">
         $(document).foundation();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script>
+        var chartdata = document.getElementById("chartData").textContent;
+        var temp = chartdata.split(',');
+        var realdata = [];
+        for (let index = 0; index < temp.length; index++) {
+            realdata.push(temp[index]);
+        }
+
+        new Chart("myChart", {
+            type: "bar",
+            data: {
+                labels: [
+                    "Number of drivers involved in fatal collisions per billion miles",
+                    "Percentage Of Drivers Involved In Fatal Collisions Who Were Speeding",
+                    "Percentage Of Drivers Involved In Fatal Collisions Who Were Alcohol-Impaired",
+                    "Percentage Of Drivers Involved In Fatal Collisions Who Were Not Distracted",
+                    "Percentage Of Drivers Involved In Fatal Collisions Who Had Not Been Involved In Any Previous Accidents",
+                    "Car Insurance Premiums ($)",
+                    "Losses incurred by insurance companies for collisions per insured driver ($)"
+                ],
+                datasets: [{
+                    backgroundColor: "gray",
+                    data: realdata
+                }]
+            },
+            options: {
+                legend: {display: false},
+                scales: {
+                yAxes: [{ticks: {min: 0, max: Math.max.apply(Math, realdata) + 50}}],
+                }
+            }
+        });
     </script>
 </body>
 </html>

@@ -56,6 +56,17 @@ app.get('/State/:name', (req, res) => {
         response = response.replace('$$INPUT5$$', row["Percentage Of Drivers Involved In Fatal Collisions Who Had Not Been Involved In Any Previous Accidents"]);
         response = response.replace('$$INPUT6$$', row["Car Insurance Premiums ($)"]);
         response = response.replace('$$INPUT7$$', row["Losses incurred by insurance companies for collisions per insured driver ($)"]);
+
+        let chartData = [];
+        chartData.push(row["Number of drivers involved in fatal collisions per billion miles"]);
+        chartData.push(row["Percentage Of Drivers Involved In Fatal Collisions Who Were Speeding"]);
+        chartData.push(row["Percentage Of Drivers Involved In Fatal Collisions Who Were Alcohol-Impaired"]);
+        chartData.push(row["Percentage Of Drivers Involved In Fatal Collisions Who Were Not Distracted"]);
+        chartData.push(row["Percentage Of Drivers Involved In Fatal Collisions Who Had Not Been Involved In Any Previous Accidents"]);
+        chartData.push(row["Car Insurance Premiums ($)"]);
+        chartData.push(row["Losses incurred by insurance companies for collisions per insured driver ($)"]);
+        response = response.replace('$$CHART$$', chartData);
+
         ID = row["ID"];
         StateShort = row["StateShort"];
         response = response.replaceAll('$$CLUE$$', StateShort);
@@ -76,18 +87,18 @@ app.get('/State/:name', (req, res) => {
                 let NextState = row.State
                 response = response.replace('$$NEXT$$', NextState);
             });
-        } 
-        
+        }
+
         if (ID > 1 && ID <= 51) {
             results[1].forEach((row) => {
                 let PrevState = row.State
                 response = response.replace('$$PREV$$', PrevState);
             });
             }
-            
-         
-        
-        res.status(200).type('html').send(response); 
+
+
+
+        res.status(200).type('html').send(response);
     }).catch((error) => {
         console.error("Error:", error); // Log the error for debugging
         res.status(404).type('txt').send("The state " + state + " is not found");
@@ -95,7 +106,7 @@ app.get('/State/:name', (req, res) => {
 });
 
 
-app.get('/Insurance/:frequency', (req, res) => { //Car insurance 
+app.get('/Insurance/:frequency', (req, res) => { //Car insurance
 
     let frequency = req.params.frequency;
 
@@ -119,17 +130,22 @@ app.get('/Insurance/:frequency', (req, res) => { //Car insurance
     Promise.all([p1, p2,]).then((results) => {
         let response = results[1].replace('$$STATENAME$$', 'States with Insurance Premiums over ' + frequency + " (URL Rounded to Nearest 100)");
         let table_body = '';
+        let chartData = [];
         results[0].forEach((row) => {
             let table_row = '<tr>';
             table_row += '<td>' + row.State + '</td>';
             table_row += '<td>' + row["Car Insurance Premiums ($)"] + '</td>';
             table_row += '</tr>';
             table_body += table_row;
+
+            chartData.push(row.State + "|" + row["Car Insurance Premiums ($)"]);
         });
         response = response.replace('$$TABLE_BODY$$', table_body);
+        response = response.replace('$$CHART$$', chartData);
+
         if (frequency <= 100) {
             response = response.replace('$$PREV$$', "")
-           
+
         }
         if (frequency >= 1300) {
             response = response.replace('$$NEXT$$', ' ');
@@ -137,11 +153,11 @@ app.get('/Insurance/:frequency', (req, res) => { //Car insurance
         if (frequency < 300) {
             response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2020/09/21st-Century-Insurance-Logo-500x313.png')
             response = response.replaceAll('$$INSUR$$', '21st Century Insurance')
-        } 
+        }
         if (frequency < 600) {
             response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2022/12/AAMI-logo-500x281.png')
             response = response.replaceAll('$$INSUR$$', 'AAMI Insurance')
-        } 
+        }
         if (frequency < 900) {
             response = response.replaceAll('$$LINK$$', 'https://1000logos.net/wp-content/uploads/2022/12/American-Family-Insurance-logo-500x281.png')
             response = response.replaceAll('$$INSUR$$', 'American Family Insurance')
@@ -159,7 +175,7 @@ app.get('/Insurance/:frequency', (req, res) => { //Car insurance
 });
 
 
-app.get('/DistractedDriving/:percentage', (req, res) => { //Car insurance 
+app.get('/DistractedDriving/:percentage', (req, res) => { //Car insurance
 
     let Percentage = req.params.percentage;
 
@@ -186,17 +202,23 @@ app.get('/DistractedDriving/:percentage', (req, res) => { //Car insurance
     Promise.all([p1, p2]).then((results) => {
         let response = results[1].replace('$$STATENAME$$', 'States with percentage of drivers who were NOT distracted over ' + Percentage + "% (URL Rounded to Nearest 10)");
         let table_body = '';
+        let chartData = [];
+
         results[0].forEach((row) => {
             let table_row = '<tr>';
             table_row += '<td>' + row.State + '</td>';
             table_row += '<td>' + row["Percentage Of Drivers Involved In Fatal Collisions Who Were Not Distracted"] + '</td>';
             table_row += '</tr>';
             table_body += table_row;
+
+            chartData.push(row.State + "|" + row["Percentage Of Drivers Involved In Fatal Collisions Who Were Not Distracted"]);
         });
         response = response.replace('$$TABLE_BODY$$', table_body);
+        response = response.replace('$$CHART$$', chartData);
+
         if (Percentage <= 10) {
             response = response.replace('$$PREV$$', "")
-           
+
         }
         if (Percentage >= 90) {
             response = response.replace('$$NEXT$$', ' ');

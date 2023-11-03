@@ -54,6 +54,8 @@
                 <div class="cell small-6 show-for-small-only">
                     <img src="$$LINK$$" alt="Picture of $$INSUR$$" style="width: 15vw; height: 10vh;">
                 </div>
+                <canvas id="myChart"></canvas>
+                <div id="chartData" style="display: none;">$$CHART$$</div>
                 <div class="grid-x grid-padding x">
                     <div class="cell small-12"><br></div>
                     <div class="cell small-12"><br></div>
@@ -74,6 +76,35 @@
     <script src="../js/vendor/foundation.js"></script>
     <script type="application/javascript">
         $(document).foundation();
-    </script> 
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script>
+        var chartdata = document.getElementById("chartData").textContent;
+        console.log(chartdata)
+        var temp = chartdata.split(',');
+        var realdata = [];
+        var labels = [];
+        for (let index = 0; index < temp.length; index++) {
+            labels.push(temp[index].split('|')[0]);
+            realdata.push(temp[index].split('|')[1]);
+        }
+
+        new Chart("myChart", {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    backgroundColor: "gray",
+                    data: realdata
+                }]
+            },
+            options: {
+                legend: {display: false},
+                scales: {
+                yAxes: [{ticks: {min: 0, max: Math.max.apply(Math, realdata) + 50}}],
+                }
+            }
+        });
+    </script>
 </body>
 </html>
